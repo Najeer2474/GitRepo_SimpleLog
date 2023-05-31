@@ -14,24 +14,7 @@ pipeline {
     }
 
 
-    stages {
-
-
-        // Printing Basic Information
-        stage('Preparing'){
-            steps {
-                echo "Jenkins Home ${env.JENKINS_HOME}"
-                echo "Jenkins URL ${env.JENKINS_URL}"
-                echo "Jenkins JOB Number ${env.BUILD_NUMBER}"
-                echo "Jenkins JOB Name ${env.JOB_NAME}"
-                echo "GitHub BranhName ${env.BRANCH_NAME}"
-                checkout scm
-
-
-            }
-        }
-
-
+echo 'Jenkins started'
          // Build Stages
         stage('Build') {
             steps {
