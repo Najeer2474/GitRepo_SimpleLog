@@ -1,97 +1,23 @@
 pipeline {
-    agent any
-
-
-        // Environment Variables
-        environment {
-        MAJOR = '1'
-        MINOR = '0'
-        //Orchestrator Services
-        UIPATH_ORCH_URL = "https://cloud.uipath.com/"
-        UIPATH_ORCH_LOGICAL_NAME = "wiprospydtqs"
-        UIPATH_ORCH_TENANT_NAME = "Najeer"
-        UIPATH_ORCH_FOLDER_NAME = "All_Projects"
-    }
-
-
-echo 'Jenkins started'
-         // Build Stages
-        stage('Build') {
-            steps {
-                echo "Building..with ${WORKSPACE}"
-                UiPathPack (
-                      outputPath: "Output\\${env.BUILD_NUMBER}",
-                      projectJsonPath: "project.json",
-                      version: [$class: 'ManualVersionEntry', version: "${MAJOR}.${MINOR}.${env.BUILD_NUMBER}"],
-                      useOrchestrator: false,
-                      traceLevel: 'None' 
-                )
-            }
-        }
-         // Test Stages
-        stage('Test') {
-            steps {
-                echo 'Testing..the workflow...'
-            }
-        }
-
-
-         // Deploy Stages
-        stage('Deploy to UAT') {
-            steps {
-                echo "Deploying ${BRANCH_NAME} to UAT "
-                UiPathDeploy (
-                packagePath: "Output\\${env.BUILD_NUMBER}",
-                orchestratorAddress: "${UIPATH_ORCH_URL}",
-                orchestratorTenant: "${UIPATH_ORCH_TENANT_NAME}",
-                folderName: "${UIPATH_ORCH_FOLDER_NAME}",
-                environments: '',
-                //credentials: [$class: 'UserPassAuthenticationEntry', credentialsId: 'APIUserKey']
-                credentials: Token(accountName: "${UIPATH_ORCH_LOGICAL_NAME}", credentialsId: 'APIUserKey'),
-                traceLevel: 'None',
-                entryPointPaths: 'Main.xaml',
-                createProcess: true
-
-
+  agent any
+  environment {
+      MAJOR = '1'
+      MINOR = '0'
+  }
+  stages {
+    stage ('PostBuild') {
+      steps {
+        UiPathDeploy (
+          packagePath: "C:\ProgramData\UiPath\Packages\SimpleLog.1.0.1.nupkg",
+          orchestratorAddress: "https://cloud.uipath.com/",
+          orchestratorTenant: "Najeer",
+          folderName: "Projects",
+          environments: "",
+          //credentials: [$class: 'UserPassAuthenticationEntry', credentialsId: “credentialsId”]
+          credentials: Token(accountName: "wiprospydtqs", credentialsId: 'APIUserKey'),
+          traceLoggingLevel: 'None'
         )
-            }
-        }
-
-
-
-
-         // Deploy to Production Step
-        stage('Deploy to Production') {
-            steps {
-                echo 'Deploy to Production'
-                }
-            }
+      }
     }
-
-
-    // Options
-    options {
-        // Timeout for pipeline
-        timeout(time:80, unit:'MINUTES')
-        skipDefaultCheckout()
-    }
-
-
-
-
-    //
-    post {
-        success {
-            echo 'Deployment has been completed!'
-        }
-        failure {
-          echo "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.JOB_DISPLAY_URL})"
-        }
-        always {
-            /* Clean workspace if success */
-            cleanWs()
-        }
-    }
-
-
+  }
 }
