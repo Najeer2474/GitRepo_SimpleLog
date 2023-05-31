@@ -8,7 +8,7 @@ pipeline {
     stage ('PostBuild') {
       steps {
         UiPathDeploy (
-          packagePath: "C:\ProgramData\UiPath\Packages\SimpleLog.1.0.1.nupkg",
+          packagePath: 'C:\ProgramData\UiPath\Packages\SimpleLog.1.0.1.nupkg',
           orchestratorAddress: "https://cloud.uipath.com/",
           orchestratorTenant: "Najeer",
           folderName: "Projects",
